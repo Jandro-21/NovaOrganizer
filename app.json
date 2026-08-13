@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "Nova",
+    "slug": "NovaOrganizer",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/logonova.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#E6F4FE",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.jandrodurillo.novaorganizer",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/logonova.png",
+        "backgroundImage": "./assets/logonova.png",
+        "monochromeImage": "./assets/logonova.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/logonova.png"
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#5A67D8",
+          "defaultChannel": "nova-reminders"
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow Nova to access your microphone for voice dictation."
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#E6F4FE",
+          "image": "./assets/logonova.png",
+          "dark": {
+            "backgroundColor": "#12141B",
+            "image": "./assets/logonova.png"
+          },
+          "imageWidth": 160,
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1856d42c-72bd-4863-acb0-26626741c0b3"
+      }
+    },
+    "owner": "jandrodurillo"
+  }
+}

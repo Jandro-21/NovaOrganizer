@@ -1,0 +1,105 @@
+# NOVAORGANIZER - LOG DE PROGRESO
+
+> Este archivo documenta cada paso realizado y lo que falta por hacer.
+
+---
+
+## [PASO 0] PLAN GENERAL
+**HECHO:**
+- Leido el prompt.txt con los requisitos del proyecto.
+- Preparado el entorno (Node v24, npm 11).
+
+**PENDIENTE:**
+- Todo el desarrollo (ver PASO 1, 2 y 3).
+
+---
+
+## [PASO 1] SCAFFOLDING (COMPLETADO)
+**HECHO:**
+- Proyecto Expo con template `blank-typescript` (Expo SDK 57, RN 0.86, React 19.2, TS estricto).
+- Restaurados prompt.txt y README.md.
+- Instaladas dependencias:
+  - `@react-navigation/native`, `native-stack`, `bottom-tabs`
+  - `zustand`, `@react-native-async-storage/async-storage`
+  - `expo-notifications`, `@react-native-community/datetimepicker`
+  - `react-native-svg`, `react-native-safe-area-context`, `react-native-screens`
+  - `expo-secure-store` (API Key de forma segura).
+- Leidos los docs versionados de Expo SDK 57 (notifications, datetimepicker, svg) segun AGENTS.md.
+
+**PENDIENTE:** Nada.
+
+---
+
+## [PASO 2] BASE DE CODIGO (COMPLETADO)
+**HECHO (estructura modular creada bajo `src/`):**
+- `src/types/index.ts` — ThemeMode, AppLanguage, AiProvider, Task, BoardNote, ChatMessage, tamanos de notas.
+- `src/theme/` — paletas claro/oscuro, hook `useTheme()` (respeta `system`).
+- `src/i18n/index.ts` — diccionarios EN/ES y hook `useI18n()` (sin libreria externa).
+- `src/stores/` — stores Zustand con persistencia en AsyncStorage:
+  - `settingsStore.ts` (tema, idioma, proveedor IA, API Key en SecureStore).
+  - `taskStore.ts` (CRUD de tareas).
+  - `boardStore.ts` (notas del corcho + posiciones).
+  - `chatStore.ts` (historial, memoria de ultimos 10 mensajes).
+- `src/services/`:
+  - `notificationService.ts` — permisos, canal Android, programar/cancelar recordatorios.
+  - `aiService.ts` — llamadas HTTP a OpenAI / Anthropic / Gemini (fetch).
+- `src/components/`:
+  - `icons/index.tsx` — iconos SVG sin emojis.
+  - `ui/` — Screen, Button, AppInput, Card, SettingRow.
+  - `TaskModal.tsx` — modal de creacion/edicion de tareas con fecha/hora y recordatorio.
+- `src/navigation/`:
+  - `MainTabs.tsx` — Tab Navigator (Board, Todo, Chat, Settings).
+  - `RootNavigator.tsx` — Stack Navigator + gating de onboarding segun API Key + Splash.
+- `src/screens/`:
+  - `OnboardingScreen.tsx` — seleccion de proveedor y guardado de API Key.
+  - `BoardScreen.tsx` — corcho interactivo: notas arrastrables (PanResponder), toque en area vacia para crear, editar/eliminar/color/tamano.
+  - `TodoScreen.tsx` — CRUD de tareas + fecha/hora + recordatorio local (programar/cancelar).
+  - `ChatScreen.tsx` — chat con memoria (ultimos 10 mensajes) y adaptador por proveedor.
+  - `SettingsScreen.tsx` — idioma (EN/ES), tema (claro/oscuro/sistema), API Key y permisos de notificacion.
+- `src/utils/id.ts` — unica fuente de `uid()`; `notificationService` y stores la reutilizan (sin duplicidad).
+- `App.tsx` — conectado a `RootNavigator` (SafeAreaProvider + StatusBar segun tema).
+- `app.json` — plugin `expo-notifications` (color `#5A67D8`, canal por defecto), `userInterfaceStyle: automatic`, permiso `POST_NOTIFICATIONS`.
+
+**VERIFICACION:**
+- `npx tsc --noEmit` → sin errores.
+- `npx expo-doctor` → 20/20 checks, sin problemas (se alinearon versiones de expo, expo-constants y expo-notifications con el SDK 57).
+- `README.md` — estructura, comandos y guia de ejecucion en Expo Go.
+
+**PENDIENTE:**
+- Prueba manual en dispositivo (Expo Go): onboarding, arrastre de notas, recordatorios y chat con IA.
+
+---
+
+## [PASO 3] ACTUALIZACION MAYOR (COMPLETADO)
+Ejecutado el prompt.txt (refactor + features). Detalles:
+
+**1. Responsividad, Safe Areas y Teclado**
+- `Screen.tsx` ya respeta `SafeAreaProvider` + insets superiores (barra de estado).
+- `ChatScreen`, `BoardScreen` (modales), `TaskModal` y `AlarmModal` usan `KeyboardAvoidingView` con `Platform.OS === 'ios' ? 'padding' : 'height'` + `ScrollView`/`FlatList` para que input y último mensaje sean visibles con el teclado.
+- `BoardScreen` refactorizado: ya NO usa lienzo estirado `BOARD_SIZE` (1200x2200) ni `PanResponder`. Ahora es un flujo **Masonry/Grid flexible** calculado con `Dimensions.get('window')` (2 columnas, 3 en pantallas >= 720px), las notas se escalan al ancho real y nunca se pierden fuera de pantalla.
+
+**2. BYOK ampliado (5 proveedores)**
+- Tipos: `AiProvider` = openai | anthropic | gemini | groq | openrouter (`AI_PROVIDER_ORDER`).
+- `aiService.ts`: adaptador por proveedor (endpoint, headers, body, parseo) + `systemPrompt` configurable + `transcribeAudio()` (Whisper OpenAI / Groq) para dictado por voz.
+- Selector elegante de proveedor (grid de chips) en `OnboardingScreen` y `SettingsScreen` (nueva fila visible de proveedor).
+
+**3. Nuevas funcionalidades core**
+- **A. Corcho Inteligente:** long-press selecciona 1+ notas → barra flotante + bottom sheet con acciones IA: Fusionar (crea nota nueva y borra las originales), Resumir (guarda nota), Explicar a fondo y pregunta libre. Resultado en modal. Nuevos iconos SVG.
+- **B. Chatbot avanzado:** `chatStore` refactorizado a **sesiones** (`ChatSession[]`) con migración automática del historial antiguo. UI con botón de historial (modal para crear/navegar/borrar conversaciones). **Contexto global**: `contextDump.ts` genera el system prompt oculto con volcado de Tareas, Notas y Alarmas.
+- **C. Modo Alarma:** nuevo `AlarmScreen` + tab "Alarmas" en `MainTabs`, `alarmStore`, `AlarmModal` (mensaje personalizado + `DateTimePicker`), canal Android dedicado `nova-alarms` y `scheduleAlarm()` en `notificationService`.
+- **D. Dictado por voz:** `DictationButton.tsx` (grabación con **`expo-audio`**, el reemplazo de `expo-av` que ya no existe en SDK 57) → transcripción por proveedor. Integrado en inputs del corcho, tareas (`TaskModal`), chat y alarmas vía prop `mic` de `AppInput`.
+
+**Entregables / librerías**
+- `expo-audio` + `expo-asset` instaladas (`npx expo install`); plugin `expo-audio` con `microphonePermission` en `app.json`.
+- Iconos SVG nuevos: Mic, Alarm, CheckSquare, History, Merge, Summarize, Question.
+- `README.md` actualizado con dependencias exactas, estructura y guía de uso.
+- i18n ES/EN ampliado (~40 claves nuevas).
+
+**VERIFICACION:**
+- `npx tsc --noEmit` → sin errores.
+- `npx expo-doctor` → 20/20 checks.
+- `npx expo export --platform android` → bundle OK (1079 módulos).
+
+**PENDIENTE:**
+- Prueba manual en dispositivo (Expo Go): corcho masonry + long-press/IA, sesiones de chat con contexto global, alarmas (notificaciones) y dictado por voz con micrófono.
+- Los proveedores Anthropic/Gemini/OpenRouter no tienen endpoint de transcripción de audio; el dictado funciona con OpenAI y Groq (se muestra aviso con los demás).

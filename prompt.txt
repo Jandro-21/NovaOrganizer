@@ -1,0 +1,37 @@
+Actúa como un desarrollador Senior experto en React Native, TypeScript y Expo. Vamos a ejecutar el "Día 3" de desarrollo de nuestra aplicación, renombrándola oficialmente a "Nova" y añadiendo nuevas funcionalidades clave de organización, IA y correcciones de interfaz.
+
+A continuación, detallo los requerimientos exactos para este bloque de trabajo:
+
+### 1. Cambio de Nombre y Asset de Logo
+- **Rebranding:** Cambia el nombre comercial y de configuración de la app en `app.json` a simplemente **"Nova"** (`"name": "Nova"`).
+- **Integración de Logo:** Implementa el logo ubicado en la carpeta de assets (`assets/logonova`) tanto en la pantalla de carga (Splash), como en la cabecera principal y en la sección de Ajustes (`SettingsScreen`).
+
+### 2. Rework Completo del Sistema de Tareas (To-Do List)
+Refactoriza la arquitectura de las tareas para soportar jerarquía de Categorías y Subcategorías:
+- **Estructura de Datos:**
+  - Define modelos TypeScript estrictos para `Task`, `Category` y `Subcategory`.
+  - Una Tarea puede pertenecer opcionalmente a una Categoría y a una Subcategoría vinculada a esa categoría.
+- **Interfaz y Gestión:**
+  - En el modal de creación/edición de tareas, añade un selector desplegable elegante para elegir la Categoría y, si tiene, la Subcategoría.
+  - Permite al usuario crear y gestionar sus propias Categorías y Subcategorías personalizadas desde la vista de Tareas o Ajustes.
+  - Añade un sistema de filtrado visual en la parte superior de la pantalla de Tareas para filtrar la lista por Categorías.
+
+### 3. Expansión del Chat: Creación Directa de Elementos (Tool Calling / Context Actions)
+- Conecta el estado global de la app (Zustand/Context) con el controlador de la IA en la pestaña de Chat.
+- **Lógica:** Implementa la capacidad para que la IA interprete intenciones del usuario (mediante 'Function Calling' o parser de comandos/JSON en el System Prompt).
+- **Ejemplo:** Si el usuario escribe en el chat *"Añade una nota verde al corcho sobre revisar la interfaz"* o *"Crea una tarea para mañana llamada Comprar micrófono en la categoría Compras"*, la IA debe invocar la función correspondiente y crear el elemento directamente en la base de datos local sin requerir tecleo manual.
+
+### 4. Nueva Funcionalidad: Cronómetro / Temporizador
+- Crea un nuevo componente/módulo reutilizable de **Cronómetro y Temporizador**.
+- Incluye controles claros de Iniciar, Pausar, Reiniciar y guardar vueltas/tiempos parciales.
+- Mantiene una estética minimalista en modo oscuro integrada con el diseño general de la aplicación.
+
+### 5. Corrección de UI/UX: Botón de Enviar en el Chat
+- **Bug Fix:** El botón de "Enviar" mensaje en la pantalla del Chat presenta problemas de responsividad y se desalinea o solapa con ciertos tamaños de pantalla o al desplegar el teclado.
+- **Solución:** Ajusta la estructura flexbox del input contenedor en `ChatScreen`. Asegura que el cuadro de texto (`TextInput`) y el botón SVG de envío se mantengan alineados horizontalmente de forma elástica usando `KeyboardAvoidingView` y `react-native-safe-area-context`.
+
+### 6. Reglas Generales
+- **Cero Emojis:** Utiliza estrictamente componentes `react-native-svg` para todos los iconos nuevos (cronómetro, categorías, carpetas, enviar, etc.).
+- **Código Modular:** Separa la lógica del cronómetro en su propio hook personalizado (`useStopwatch`) y los componentes visuales en archivos independientes dentro de `/components`.
+
+Proporciona el código modificado de los modelos, los componentes actualizados y los comandos de instalación si se requiere alguna dependencia adicional.
